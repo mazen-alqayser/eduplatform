@@ -1,42 +1,166 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <main class="max-w-5xl mx-auto px-6 py-10">
 
-  <section class="bg-white shadow-lg rounded-2xl p-8 mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ title }}</h1>
+  <section class="bg-white shadow-lg rounded-2xl p-8 mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ title }}</h1>
 
-    {% if lesson.video %}
-    <div class="mb-6">
-      <video controls class="w-full rounded-xl shadow">
-        <source src="{{ url_for('uploaded_file', filename=lesson.video) }}" type="video/mp4">
-        {% if lang == 'ar' %} متصفحك لا يدعم تشغيل الفيديو. {% else %} Your browser does not support video playback. {% endif %}
-      </video>
-    </div>
-    {% endif %}
+        {% if lesson.video_url or lesson.video %}
+                <div class="mb-4 relative" style="padding-bottom: 56.25%; height: 0; overflow: hidden;">
 
-    <p class="text-gray-700 leading-relaxed mb-6">
-      {{ description }}
-    </p>
+     
+            {% if lesson.video_url %}
+       
+        {% set video_url = lesson.video_url %}
+        
+        {# معالجة رابط يوتيوب: استخراج ID الفيديو بشكل آمن #}
+        {% set video_id = '' %}
+        
+        {% if 'v=' in video_url %}
+          {% set video_id_parts = video_url.split('v=') %}
+          {% set video_id = video_id_parts[-1].split('&')[0].split('?')[0] %}
+        
+        {% elif 'youtu.be/' in video_url %}
+          {% set video_id = video_url.split('/')[-1].split('?')[0] %}
+        
+        {% elif 'embed/' in video_url %}
+          {% set video_id = video_url.split('embed/')[-1].split('?')[0] %}
+        {% endif %}
+       
+        {# بناء رابط التضمين الأكثر تقييداً #}
+        {# 💡 المعاملات لتقييد يوتيوب: #}
+        {# - modestbranding=1: يقلل علامة يوتيوب ويمنع النقر عليها. #}
+        {# - rel=0: يمنع فيديوهات ذات صلة في النهاية. #}
+        {# - showinfo=0: يزيل العنوان والقناة. #}
+        {# - iv_load_policy=3: يمنع ظهور التعليقات التوضيحية. #}
+        {# - disablekb=1: يعطل اختصارات لوحة المفاتيح. #}
+        {% set embed_url = "https://www.youtube-nocookie.com/embed/" ~ video_id ~ "?modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1" %}
 
-    {% if lesson.material %}
-    <div class="bg-gray-50 p-4 rounded-lg border">
-      <h3 class="font-semibold text-lg mb-2 text-blue-700">
-        {% if lang == 'ar' %} 📘 مواد إضافية {% else %} 📘 Additional Materials {% endif %}
-      </h3>
-      <a href="{{ url_for('uploaded_file', filename=lesson.material) }}" 
-         class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-         {% if lang == 'ar' %} تحميل الملف {% else %} Download File {% endif %}
-      </a>
-    </div>
-    {% endif %}
-  </section>
 
-  <div class="text-center">
-    <a href="{{ url_for('course_page', course_id=lesson.course_id) }}" 
-       class="inline-block px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl shadow">
-      {% if lang == 'ar' %} ⬅️ العودة إلى الدورة {% else %} ⬅️ Back to Course {% endif %}
-    </a>
-  </div>
+        <iframe
+            id="youtube-iframe"
+            src="{{ embed_url }}"
+            frameborder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
+            loading="lazy"
+            class="w-full h-full rounded-xl shadow-2xl absolute inset-0">
+        </iframe>
+
+            {% elif lesson.video %}
+        {# فيديو محلي: استخدام وسم الفيديو الأصلي #}
+        <video controls class="w-full h-full object-cover rounded-xl shadow-2xl absolute inset-0">
+          <source src="{{ url_for('uploaded_file', filename=lesson.video) }}" type="video/mp4">
+          {% if lang == 'ar' %} متصفحك لا يدعم تشغيل الفيديو. {% else %} Your browser does not support video playback. {% endif %}
+        </video>
+      {% endif %}
+    </div>
+    
+        <button id="copy-lesson-link" 
+            class="mt-2 inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded font-medium hover:bg-purple-700 transition shadow">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        {% if lang == 'ar' %} نسخ رابط الدرس (رابط المنصة) {% else %} Copy Lesson Link (Platform URL) {% endif %}
+    </button>
+    
+    {% endif %}
+
+    <p class="text-gray-700 leading-relaxed mt-6 mb-6">
+      {{ description }}
+    </p>
+
+    {# 💡 القسم الجديد: عرض رابط خارجي بعنون (إذا توفرت البيانات) 💡 #}
+    {% if lesson.link_url and lesson.link_title %}
+    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200 mb-6">
+      <h3 class="font-semibold text-lg mb-2 text-indigo-700">
+        {% if lang == 'ar' %} 🔗 رابط خارجي مفيد {% else %} 🔗 Useful External Link {% endif %}
+      </h3>
+      <a href="{{ lesson.link_url }}" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded font-medium hover:bg-indigo-700 transition shadow">
+        <span>{{ lesson.link_title }}</span>
+        <svg class="w-4 h-4 transform {{ 'rotate-180' if lang == 'ar' else '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+      </a>
+    </div>
+    {% endif %}
+
+    {% if lesson.material %}
+    <div class="bg-gray-50 p-4 rounded-lg border">
+      <h3 class="font-semibold text-lg mb-2 text-blue-700">
+        {% if lang == 'ar' %} 📘 مواد إضافية {% else %} 📘 Additional Materials {% endif %}
+      </h3>
+      <a href="{{ url_for('uploaded_file', filename=lesson.material) }}" 
+          class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition shadow">
+        {% if lang == 'ar' %} تحميل الملف {% else %} Download File {% endif %}
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="text-center">
+    <a href="{{ url_for('course_page', course_id=lesson.course_id) }}" 
+        class="inline-block px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl shadow">
+      {% if lang == 'ar' %} ⬅️ العودة إلى الدورة {% else %} ⬅️ Back to Course {% endif %}
+    </a>
+  </div>
 
 </main>
+
+<script>
+    // وظيفة نسخ رابط المنصة إلى الحافظة
+    function copyToClipboard(text) {
+        // يستخدم document.execCommand('copy') كبديل مضمون لـ navigator.clipboard
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed'; // لجعله غير مرئي
+        textarea.style.opacity = 0;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            return true;
+        } catch (err) {
+            console.error('فشل في نسخ النص: ', err);
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+
+    window.onload = function() {
+        const copyButton = document.getElementById('copy-lesson-link');
+        const iframe = document.getElementById('youtube-iframe');
+        
+        // 1. منطق زر نسخ رابط المنصة
+        if (copyButton) {
+            copyButton.addEventListener('click', function() {
+                const lessonUrl = window.location.href; // الحصول على رابط المنصة الحالي
+                const success = copyToClipboard(lessonUrl);
+                
+                if (success) {
+                    const originalText = copyButton.innerHTML;
+                    copyButton.innerHTML = '{% if lang == 'ar' %} ✅ تم النسخ! {% else %} ✅ Copied! {% endif %}';
+                    copyButton.classList.add('bg-green-500', 'hover:bg-green-600');
+                    copyButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalText;
+                        copyButton.classList.remove('bg-green-500', 'hover:-green-600');
+                        copyButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                    }, 2000);
+                }
+            });
+        }
+        
+        // 2. محاولة منع قائمة النقر بزر الماوس الأيمن (Context Menu) على الإطار
+        // ملاحظة: لا يمكن منع هذا الإجراء بشكل مطلق من جانب المتصفح.
+        if (iframe) {
+            iframe.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+    };
+</script>
+
 {% endblock %}
