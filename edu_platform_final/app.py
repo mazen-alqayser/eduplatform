@@ -721,73 +721,109 @@ def admin_course_new():
         return redirect(url_for('admin_index'))
     return render_template('admin/course_form.html', course=None)
 
+
+# 📝 إضافة درس جديد
 @app.route('/admin/course/<int:course_id>/lesson/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_lesson_new(course_id):
-    # ... (بقية الدالة كما هي) ...
     if request.method == 'POST':
+        # 1. قراءة البيانات من النموذج
         title_ar = request.form.get('title_ar', '').strip()
         title_en = request.form.get('title_en', '').strip()
+        content_ar = request.form.get('content_ar', '').strip()
+        content_en = request.form.get('content_en', '').strip()
         pos = int(request.form.get('position', '0') or 0)
+        
+        # 🆕 قراءة رابط اليوتيوب الجديد
+        video_url = request.form.get('video_embed_url', '').strip()
+        
         video = request.files.get('video')
         video_filename = None
-        # تم تبسيط التحقق من ملف الفيديو لتقبل أي شيء لغرض التطوير
+        
+        # 2. معالجة تحميل الفيديو المحلي
         if video and video.filename:
             video_filename = utils.secure_filename(video.filename)
+            # يجب التأكد من عمل هذه الدالة بشكل صحيح لحفظ الملف
             video.save(os.path.join(app.config['UPLOAD_FOLDER'], video_filename))
+            
+            # 💡 منطق تفضيل: إذا تم تحميل ملف، يتم إهمال رابط اليوتيوب
+            video_url = None
+        
         conn = get_db()
+        
+        # 3. تحديث استعلام الإضافة (إضافة حقل video_url)
         conn.execute('''
-             INSERT INTO lessons (course_id, title_ar, title_en, content_ar, content_en, position, video)
-             VALUES (?, ?, ?, ?, ?, ?, ?)
-          ''', (course_id, title_ar, title_en, request.form.get('content_ar'),
-                request.form.get('content_en'), pos, video_filename))
+             INSERT INTO lessons (course_id, title_ar, title_en, content_ar, content_en, position, video, video_url)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+           ''', (course_id, title_ar, title_en, content_ar,
+                 content_en, pos, video_filename, video_url))
         conn.commit()
+        
+        flash("✅ تم إضافة الدرس بنجاح", "success")
         return redirect(url_for('admin_lessons', course_id=course_id))
+        
     return render_template('admin/lesson_form.html', lesson=None, course_id=course_id)
- 
- # 📝 تعديل درس موجود
+# 📝 تعديل درس موجود
 @app.route("/admin/course/<int:course_id>/lesson/<int:lesson_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def admin_lesson_edit(course_id, lesson_id):
     conn = get_db()
+    
+    # 1. جلب بيانات الدرس. (يفترض أن lesson سيعود كقاموس أو صف)
     lesson = conn.execute("SELECT * FROM lessons WHERE id=? AND course_id=?", (lesson_id, course_id)).fetchone()
+    
     if not lesson:
-        flash("لم يتم العثور على الدرس")
+        flash("لم يتم العثور على الدرس", "error")
         return redirect(url_for("admin_lessons", course_id=course_id))
 
     if request.method == "POST":
+        # 2. قراءة البيانات من النموذج
         title_ar = request.form.get("title_ar", "").strip()
         title_en = request.form.get("title_en", "").strip()
         content_ar = request.form.get("content_ar", "").strip()
         content_en = request.form.get("content_en", "").strip()
         position = int(request.form.get("position", "0") or 0)
+        
+        # ✅ التعديل الأول: قراءة رابط اليوتيوب باستخدام اسم الحقل الصحيح في النموذج (video_url)
+        video_url_value = request.form.get("video_url", "").strip()
+        # إذا كانت القيمة فارغة، نرسل None إلى قاعدة البيانات لتجنب تخزين سلسلة نصية فارغة
+        if not video_url_value:
+            video_url_value = None
 
         video = request.files.get("video")
-        video_filename = lesson["video"]
+        video_filename = lesson["video"] # الاحتفاظ بالاسم القديم للفيديو المحلي
 
+        # 3. معالجة تحميل ملف جديد
         if video and video.filename:
             # حذف الفيديو القديم إذا وُجد
             if video_filename:
-                old_path = os.path.join(app.config["UPLOAD_FOLDER"], video_filename)
-                if os.path.exists(old_path):
+                old_path = os.path.join(app.config.get("UPLOAD_FOLDER", ''), video_filename)
+                if os.path.exists(old_path) and os.path.isfile(old_path):
                     os.remove(old_path)
             # حفظ الفيديو الجديد
             video_filename = utils.secure_filename(video.filename)
-            video.save(os.path.join(app.config["UPLOAD_FOLDER"], video_filename))
-
+            # video.save(os.path.join(app.config.get("UPLOAD_FOLDER", ''), video_filename))
+            
+            # منطق تفضيل: إذا تم تحميل ملف، يتم إهمال رابط اليوتيوب
+            video_url_value = None 
+            
+        # 4. ✅ التعديل الثاني: تصحيح استعلام التحديث. 
+        # يجب أن يتطابق اسم العمود في SQL مع ما هو موجود فعلياً في القاعدة (يفترض أنه video_url)
         conn.execute("""
              UPDATE lessons
-             SET title_ar=?, title_en=?, content_ar=?, content_en=?, position=?, video=?
+             SET title_ar=?, title_en=?, content_ar=?, content_en=?, position=?, video=?, video_url=?
              WHERE id=? AND course_id=?
-          """, (title_ar, title_en, content_ar, content_en, position, video_filename, lesson_id, course_id))
+           """, (title_ar, title_en, content_ar, content_en, position, video_filename, video_url_value, lesson_id, course_id))
         conn.commit()
 
         flash("✅ تم تحديث بيانات الدرس بنجاح", "success")
         return redirect(url_for("admin_lessons", course_id=course_id))
 
+    # تمرير البيانات الحالية للعرض في النموذج
     return render_template("admin/lesson_form.html", lesson=lesson, course_id=course_id)
+
 @app.route("/admin/course/<int:course_id>/lesson/<int:lesson_id>/delete", methods=["POST", "GET"])
 @login_required
 @admin_required
