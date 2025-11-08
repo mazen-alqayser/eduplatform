@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="bg-gradient-to-br from-white via-gray-50 to-green-50 min-h-screen py-16 font-sans">
+<div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-10 border border-gray-100">
+
+    <div class="flex items-center justify-between mb-8 flex-wrap gap-2">
+        <h1 class="text-3xl font-extrabold text-green-700">
+            {{ 'Admin Dashboard' if lang=='en' else 'لوحة تحكم المشرف' }}
+        </h1>
+
+        <div class="flex gap-2 flex-wrap">
+            
+            {# زر إضافة دورة جديدة #}
+            <a href="{{ url_for('admin_course_new', lang=lang) }}"
+               class="px-6 py-2 bg-green-600 text-white rounded-full font-semibold shadow hover:bg-green-700 transition">
+                {{ '➕ New Course' if lang=='en' else '➕ إضافة دورة جديدة' }}
+            </a>
+            
+            {# ⭐ تم إضافة هذا الزر لإضافة شريحة جديدة ⭐ #}
+            <a href="{{ url_for('admin_slider_new', lang=lang) }}"
+               class="px-6 py-2 bg-indigo-600 text-white rounded-full font-semibold shadow hover:bg-indigo-700 transition">
+                {{ '🖼️ New Slide' if lang=='en' else '🖼️ إضافة شريحة جديدة' }}
+            </a>
+            
+            {# زر طلبات التسجيل #}
+            <a href="{{ url_for('admin_enroll_requests', lang=lang) }}"
+               class="px-6 py-2 bg-blue-600 text-white rounded-full font-semibold shadow hover:bg-blue-700 transition">
+                {{ '📝 Enrollment Requests' if lang=='en' else '📝 طلبات التسجيل' }}
+            </a>
+        </div>
+    </div>
+
+    ---
+    
+    <h2 class="text-2xl font-bold text-indigo-700 mt-10 mb-4 pb-2 border-b border-gray-100">
+        {{ 'Slider Images Management' if lang=='en' else 'إدارة صور الشريط الرئيسي' }}
+    </h2>
+
+    {% if hero_slides %}
+        <div class="space-y-3">
+            {% for slide in hero_slides %}
+            <div class="bg-indigo-50 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-indigo-200 shadow-sm">
+                
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-10 rounded overflow-hidden shadow">
+                         <img src="{{ url_for('uploaded_file', filename=slide.image_path) if slide.image_path else url_for('static', filename='placeholder.jpg') }}" 
+                              alt="Slide Image" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <div class="text-base font-semibold text-gray-800">{{ slide.title_ar or 'بدون عنوان عربي' }}</div>
+                        <div class="text-xs text-gray-500 mt-1">{{ slide.title_en or 'No English Title' }}</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href="{{ url_for('admin_slider_edit', slide_id=slide.id, lang=lang) }}"
+                       class="px-3 py-1 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600 transition">
+                        {{ 'Edit' if lang=='en' else 'تعديل' }}
+                    </a>
+
+                    <form method="post" action="{{ url_for('admin_slider_delete', slide_id=slide.id, lang=lang) }}" 
+                          onsubmit="return confirm('{{ 'Delete this slide?' if lang=='en' else 'هل تريد حذف هذه الشريحة؟' }}');"
+                          class="inline-block">
+                      <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition">
+                          {{ 'Delete' if lang=='en' else 'حذف' }}
+                      </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 mt-8 mb-10">{{ 'No slider images yet. Add some to display on the home page.' if lang=='en' else 'لا توجد شرائح بعد. أضف بعضاً لعرضها في الصفحة الرئيسية.' }}</p>
+        
+        {# إضافة زر إضافة شريحة هنا أيضاً إذا كانت القائمة فارغة #}
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_slider_new', lang=lang) }}"
+               class="inline-flex items-center px-6 py-2 bg-indigo-500 text-white rounded-full font-semibold shadow hover:bg-indigo-600 transition">
+                {{ '🖼️ Add First Slide' if lang=='en' else '🖼️ إضافة أول شريحة' }}
+            </a>
+        </div>
+        
+    {% endif %}
+
+    ---
+
+    <h2 class="text-2xl font-bold text-green-700 mt-10 mb-4 pb-2 border-b border-gray-100">
+        {{ 'Courses Management' if lang=='en' else 'إدارة الدورات' }}
+    </h2>
+    
+    {% if courses %}
+        <div class="space-y-3">
+            {% for c in courses %}
+            <div class="bg-white p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-gray-100 shadow-sm">
+                <div>
+                    <div class="text-lg font-semibold text-gray-800">{{ c.title_ar or '-' }}</div>
+                    <div class="text-sm text-gray-500 mt-1">{{ c.title_en or '-' }}</div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a href="{{ url_for('admin_lessons', course_id=c.id, lang=lang) }}"
+                       class="px-3 py-1 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition">
+                        {{ 'Lessons' if lang=='en' else 'الدروس' }}
+                    </a>
+
+                    <a href="{{ url_for('admin_course_edit', course_id=c.id, lang=lang) }}"
+                       class="px-3 py-1 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600 transition">
+                        {{ 'Edit' if lang=='en' else 'تعديل' }}
+                    </a>
+
+                    <form method="post" action="{{ url_for('admin_course_delete', course_id=c.id, lang=lang) }}" 
+                          onsubmit="return confirm('{{ 'Delete this course?' if lang=='en' else 'هل تريد حذف هذه الدورة؟' }}');"
+                          class="inline-block">
+                      <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition">
+                          {{ 'Delete' if lang=='en' else 'حذف' }}
+                      </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 mt-8">{{ 'No courses yet.' if lang=='en' else 'لا توجد دورات بعد.' }}</p>
+    {% endif %}
+</div>
+
+
+</main>
+{% endblock %}

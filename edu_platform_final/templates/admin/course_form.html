@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-8">
+  <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">
+    {% if course %}تعديل الدورة{% else %}إضافة دورة جديدة{% endif %}
+  </h2>
+
+  <!-- ✅ تم تعديل مسار الإرسال بحيث يفرق بين الإضافة والتعديل -->
+  <form method="post" enctype="multipart/form-data"
+        action="{% if course %}{{ url_for('admin_course_edit', course_id=course.id) }}{% else %}{{ url_for('admin_course_new') }}{% endif %}">
+    
+    <!-- عنوان الدورة بالعربية -->
+    <label class="block mb-2 font-semibold text-gray-700">عنوان الدورة (AR)</label>
+    <input name="title_ar" 
+           value="{{ course.title_ar if course else '' }}" 
+           class="w-full p-2 border rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+    <!-- عنوان الدورة بالإنجليزية -->
+    <label class="block mb-2 font-semibold text-gray-700">Course Title (EN)</label>
+    <input name="title_en" 
+           value="{{ course.title_en if course else '' }}" 
+           class="w-full p-2 border rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+    <!-- الوصف المختصر بالعربية -->
+    <label class="block mb-2 font-semibold text-gray-700">الوصف المختصر (AR)</label>
+    <input name="short_desc_ar" 
+           value="{{ course.short_desc_ar if course else '' }}" 
+           class="w-full p-2 border rounded mb-3"/>
+
+    <!-- الوصف المختصر بالإنجليزية -->
+    <label class="block mb-2 font-semibold text-gray-700">Short Description (EN)</label>
+    <input name="short_desc_en" 
+           value="{{ course.short_desc_en if course else '' }}" 
+           class="w-full p-2 border rounded mb-3"/>
+
+    <!-- الوصف الكامل بالعربية -->
+    <label class="block mb-2 font-semibold text-gray-700">الوصف الكامل (AR)</label>
+    <textarea name="full_desc_ar" 
+              class="w-full p-2 border rounded mb-3" 
+              rows="4">{{ course.full_desc_ar if course else '' }}</textarea>
+
+    <!-- الوصف الكامل بالإنجليزية -->
+    <label class="block mb-2 font-semibold text-gray-700">Full Description (EN)</label>
+    <textarea name="full_desc_en" 
+              class="w-full p-2 border rounded mb-3" 
+              rows="4">{{ course.full_desc_en if course else '' }}</textarea>
+
+    <!-- صورة الدورة -->
+    <label class="block mb-2 font-semibold text-gray-700">صورة الدورة</label>
+    <input type="file" name="image" class="mb-4" />
+    
+    {% if course and course.image %}
+      <div class="mb-4">
+        <p class="text-sm text-gray-600 mb-1">الصورة الحالية:</p>
+        <img src="{{ url_for('uploaded_file', filename=course.image) }}" class="w-40 h-24 object-cover rounded shadow">
+      </div>
+    {% endif %}
+
+    <!-- زر الحفظ -->
+    <div class="text-center mt-6">
+      <button type="submit" 
+              class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200">
+        {% if course %}💾 تحديث الدورة{% else %}➕ حفظ الدورة{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

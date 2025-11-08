@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="bg-gradient-to-br from-gray-50 to-green-50 min-h-[80vh] py-12">
+
+  <!-- العنوان -->
+  <div class="max-w-6xl mx-auto px-6 mb-12 text-center">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-3">
+      {{ 'الملف الشخصي' if lang == 'ar' else 'My Profile' }}
+    </h1>
+    <p class="text-gray-600 text-lg">
+      {{ 'تعرّف على دوراتك وانظر إلى إنجازاتك التعليمية' if lang == 'ar' else 'Explore your enrolled courses and learning journey' }}
+    </p>
+  </div>
+
+  <!-- محتوى الصفحة: شبكة الدورات -->
+  <div class="max-w-6xl mx-auto px-6 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+    {% if courses %}
+      {% for item in courses %}
+      <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-2xl transition flex flex-col">
+
+        <!-- صورة الدورة -->
+        <img src="{{ item.course.image and url_for('uploaded_file', filename=item.course.image) or 'https://source.unsplash.com/800x450/?education,learning' }}"
+             alt="{{ item.course.title }}"
+             class="w-full h-48 object-cover rounded-lg mb-4">
+
+        <!-- اسم الدورة -->
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ item.course.title }}</h3>
+
+        <!-- وصف الدورة -->
+        <p class="text-gray-600 mb-4 flex-grow">
+          {{ item.course.short_desc or ('دورة تعليمية مميزة لتطوير مهاراتك' if lang=='ar' else 'A unique course to enhance your skills.') }}
+        </p>
+
+        <!-- قائمة الدروس -->
+        {% if item.lessons %}
+          <ul class="list-disc pl-5 mb-4 text-gray-700 text-sm">
+            {% for lesson in item.lessons %}
+              <li>{{ lesson.title }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 mb-4 text-sm">{{ 'لا توجد دروس لهذه الدورة بعد.' if lang=='ar' else 'No lessons available for this course.' }}</p>
+        {% endif %}
+
+        <!-- الأزرار -->
+        <div class="flex gap-3 mt-auto">
+          <form method="post" action="{{ url_for('like_course', course_id=item.course.id) }}">
+            <button class="flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition">
+              ❤️ {{ 'أعجبني' if lang=='ar' else 'Like' }}
+            </button>
+          </form>
+          
+          <a href="{{ url_for('course_page', course_id=item.course.id) }}"
+             class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition">
+            {{ 'فتح الدورة' if lang=='ar' else 'Open Course' }}
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <div class="col-span-full text-center py-16">
+        <p class="text-gray-600 text-lg">
+          {{ 'لم تنضم إلى أي دورة بعد.' if lang=='ar' else 'You have not enrolled in any courses yet.' }}
+        </p>
+        <a href="{{ url_for('landing', lang=lang) }}"
+           class="inline-block mt-6 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition">
+          {{ 'استكشف الدورات' if lang=='ar' else 'Explore Courses' }}
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock %}

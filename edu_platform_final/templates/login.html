@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-white py-10">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 border border-gray-100">
+
+    <!-- العنوان -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-800 mb-2">
+        {{ 'تسجيل الدخول' if lang == 'ar' else 'Login' }}
+      </h2>
+      <p class="text-gray-500 text-sm">
+        {{ 'مرحباً بعودتك! الرجاء إدخال بياناتك للوصول إلى حسابك.' if lang == 'ar' else 'Welcome back! Please enter your credentials to continue.' }}
+      </p>
+    </div>
+
+    <!-- نموذج تسجيل الدخول -->
+    <form method="post" class="space-y-5">
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1" for="email">
+          {{ 'البريد الإلكتروني' if lang == 'ar' else 'Email' }}
+        </label>
+        <input name="email" id="email" type="email" required
+               class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+               placeholder="{{ 'أدخل بريدك الإلكتروني' if lang == 'ar' else 'Enter your email' }}">
+      </div>
+
+      <div>
+        <label class="block text-gray-700 font-medium mb-1" for="password">
+          {{ 'كلمة المرور' if lang == 'ar' else 'Password' }}
+        </label>
+        <input name="password" id="password" type="password" required
+               class="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+               placeholder="{{ 'أدخل كلمة المرور' if lang == 'ar' else 'Enter your password' }}">
+      </div>
+
+      <div class="flex items-center justify-between text-sm">
+        <a href="{{ url_for('register', lang=lang) }}" class="text-green-600 hover:underline font-medium">
+          {{ 'إنشاء حساب جديد' if lang == 'ar' else 'Create an account' }}
+        </a>
+        <a href="#" class="text-gray-500 hover:text-green-600 hover:underline">
+          {{ 'نسيت كلمة المرور؟' if lang == 'ar' else 'Forgot password?' }}
+        </a>
+      </div>
+
+      <button type="submit"
+              class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow transition">
+        {{ 'تسجيل الدخول' if lang == 'ar' else 'Login' }}
+      </button>
+
+    </form>
+
+    <!-- فاصل -->
+    <div class="my-6 text-center relative">
+      <span class="bg-white px-3 text-gray-400 text-sm">أو</span>
+      <div class="absolute inset-x-0 top-1/2 border-t border-gray-200 -z-10"></div>
+    </div>
+
+    <!-- تسجيل عبر واتساب (اختياري) -->
+    <div class="text-center">
+      <a href="https://wa.me/" target="_blank"
+         class="inline-flex items-center justify-center gap-2 px-5 py-3 border border-green-600 text-green-700 rounded-xl font-medium hover:bg-green-50 transition">
+         💬 {{ 'تسجيل الدخول عبر واتساب' if lang == 'ar' else 'Login via WhatsApp' }}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

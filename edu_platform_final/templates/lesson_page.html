@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-5xl mx-auto px-6 py-10">
+
+  <section class="bg-white shadow-lg rounded-2xl p-8 mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ title }}</h1>
+
+    {% if lesson.video %}
+    <div class="mb-6">
+      <video controls class="w-full rounded-xl shadow">
+        <source src="{{ url_for('uploaded_file', filename=lesson.video) }}" type="video/mp4">
+        {% if lang == 'ar' %} متصفحك لا يدعم تشغيل الفيديو. {% else %} Your browser does not support video playback. {% endif %}
+      </video>
+    </div>
+    {% endif %}
+
+    <p class="text-gray-700 leading-relaxed mb-6">
+      {{ description }}
+    </p>
+
+    {% if lesson.material %}
+    <div class="bg-gray-50 p-4 rounded-lg border">
+      <h3 class="font-semibold text-lg mb-2 text-blue-700">
+        {% if lang == 'ar' %} 📘 مواد إضافية {% else %} 📘 Additional Materials {% endif %}
+      </h3>
+      <a href="{{ url_for('uploaded_file', filename=lesson.material) }}" 
+         class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+         {% if lang == 'ar' %} تحميل الملف {% else %} Download File {% endif %}
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="text-center">
+    <a href="{{ url_for('course_page', course_id=lesson.course_id) }}" 
+       class="inline-block px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl shadow">
+      {% if lang == 'ar' %} ⬅️ العودة إلى الدورة {% else %} ⬅️ Back to Course {% endif %}
+    </a>
+  </div>
+
+</main>
+{% endblock %}

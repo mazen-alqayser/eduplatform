@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-6xl mx-auto px-6 py-10">
+
+  <!-- معلومات الدورة -->
+  <section class="bg-white shadow-lg rounded-2xl p-8 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+      <div>
+        <img src="{{ course.image and url_for('uploaded_file', filename=course.image) or 'https://source.unsplash.com/800x450/?education,learning' }}"
+             alt="{{ course.title_ar if session.get('lang','ar')=='ar' else course.title_en }}"
+             class="rounded-xl shadow-md w-full h-56 object-cover mb-5">
+      </div>
+
+      <div class="md:col-span-2 space-y-4">
+        <h1 class="text-3xl font-extrabold text-gray-800">
+          {{ course.title_ar if session.get('lang','ar')=='ar' else course.title_en }}
+        </h1>
+        <p class="text-gray-600 leading-relaxed">
+          {{ course.short_desc_ar if session.get('lang','ar')=='ar' else course.short_desc_en or ('دورة تعليمية شاملة ومبسطة.' if session.get('lang','ar')=='ar' else 'Comprehensive and simplified course.') }}
+        </p>
+        <p class="text-sm text-gray-400">
+          {{ course.full_desc_ar if session.get('lang','ar')=='ar' else course.full_desc_en or '' }}
+        </p>
+
+        {% if not is_enrolled %}
+        <!-- زر التسجيل -->
+        <form method="post" action="{{ url_for('enroll', course_id=course.id) }}" class="pt-2">
+          <button
+            class="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 shadow transition">
+            📱 {% if session.get('lang','ar')=='ar' %} التسجيل عبر واتساب {% else %} Register via WhatsApp {% endif %}
+          </button>
+        </form>
+        {% else %}
+        <div class="bg-green-100 text-green-700 p-3 rounded-lg font-semibold shadow-sm">
+          ✅ {% if session.get('lang','ar')=='ar' %} تم قبولك في الدورة — يمكنك الآن الوصول إلى جميع الدروس {% else %} You have been enrolled — you can now access all lessons {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- قائمة الدروس -->
+  <section class="bg-white shadow-lg rounded-2xl p-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+      {% if session.get('lang','ar')=='ar' %} الدروس التعليمية {% else %} Lessons {% endif %}
+    </h2>
+
+    {% if lessons %}
+      <div class="grid md:grid-cols-2 gap-6">
+        {% for l in lessons %}
+        <div class="border border-gray-200 rounded-xl p-5 hover:shadow-md transition bg-gray-50">
+          {% if is_enrolled %}
+          <!-- الدرس مفتوح -->
+          <h3 class="text-lg font-semibold text-green-700 mb-2">
+            {{ l.title_ar if session.get('lang','ar')=='ar' else l.title_en }}
+          </h3>
+
+          {% if l.video %}
+            <video controls class="rounded-lg w-full h-48 shadow-sm mb-3">
+              <source src="{{ url_for('uploaded_file', filename=l.video) }}" type="video/mp4">
+              {% if session.get('lang','ar')=='ar' %} متصفحك لا يدعم الفيديو {% else %} Your browser does not support video {% endif %}
+            </video>
+          {% endif %}
+
+          <p class="text-sm text-gray-600 mb-3">
+            {{ l.description_ar if session.get('lang','ar')=='ar' else l.description_en or ('لا يوجد وصف متاح لهذا الدرس.' if session.get('lang','ar')=='ar' else 'No description available.') }}
+          </p>
+
+          <a href="{{ url_for('lesson_page', lesson_id=l.id, lang=session.get('lang','ar')) }}"
+             class="block text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            {% if session.get('lang','ar')=='ar' %} ▶️ مشاهدة الدرس {% else %} ▶️ Watch Lesson {% endif %}
+          </a>
+
+          {% else %}
+          <!-- الدرس مغلق -->
+          <div class="text-center text-gray-500">
+            <h3 class="font-semibold text-lg mb-1">
+              {{ l.title_ar if session.get('lang','ar')=='ar' else l.title_en }}
+            </h3>
+            <p class="text-sm">
+              🔒 {% if session.get('lang','ar')=='ar' %} هذا الدرس مغلق — انتظر قبول طلبك للتسجيل {% else %} This lesson is locked — wait for enrollment approval {% endif %}
+            </p>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-500 text-center py-10 text-lg">
+        {% if session.get('lang','ar')=='ar' %} لم يتم إضافة دروس بعد لهذه الدورة. {% else %} No lessons have been added to this course yet. {% endif %}
+      </p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

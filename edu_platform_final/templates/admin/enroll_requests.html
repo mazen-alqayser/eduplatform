@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-5xl mx-auto px-6 py-10">
+
+    <!-- العنوان -->
+    <h1 class="text-3xl font-bold mb-8 text-gray-800">طلبات التسجيل في الدورات</h1>
+
+    {% if requests %}
+    <div class="overflow-x-auto">
+        <table id="requests-table" class="w-full border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+                <tr class="text-left">
+                    <th class="px-4 py-3">المستخدم</th>
+                    <th class="px-4 py-3">الدورة</th>
+                    <th class="px-4 py-3">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white">
+                {% for req in requests %}
+                <tr id="request-{{ req.id }}" class="border-t border-gray-200 hover:bg-gray-50 transition">
+                    <td class="px-4 py-3">{{ req.fullname }} ({{ req.username }})</td>
+                    <td class="px-4 py-3">{{ req.title_ar }} / {{ req.title_en }}</td>
+                    <td class="px-4 py-3 flex gap-2">
+                        <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition accept-btn"
+                                data-id="{{ req.id }}">
+                            قبول ✅
+                        </button>
+                        <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium transition reject-btn"
+                                data-id="{{ req.id }}">
+                            رفض ❌
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-600 mt-6 text-center">لا توجد طلبات تسجيل حالياً.</p>
+    {% endif %}
+
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // قبول الطلب
+    document.querySelectorAll(".accept-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            const requestId = this.dataset.id;
+            fetch(`/admin/enroll_requests/${requestId}/accept`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.ok) {
+                    // إزالة الصف من الجدول
+                    const row = document.getElementById(`request-${requestId}`);
+                    row.remove();
+                    alert("✅ تم قبول الطلب وتفعيل جميع دروس الدورة للمستخدم");
+                } else {
+                    alert("❌ حدث خطأ أثناء قبول الطلب");
+                }
+            })
+            .catch(() => alert("❌ حدث خطأ في الاتصال بالخادم"));
+        });
+    });
+
+    // رفض الطلب
+    document.querySelectorAll(".reject-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            const requestId = this.dataset.id;
+            fetch(`/admin/enroll_requests/${requestId}/reject`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.ok) {
+                    const row = document.getElementById(`request-${requestId}`);
+                    row.remove();
+                    alert("🚫 تم رفض أو إيقاف الطلب");
+                } else {
+                    alert("❌ حدث خطأ أثناء رفض الطلب");
+                }
+            })
+            .catch(() => alert("❌ حدث خطأ في الاتصال بالخادم"));
+        });
+    });
+});
+</script>
+{% endblock %}

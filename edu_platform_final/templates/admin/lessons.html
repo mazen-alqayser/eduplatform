@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- العنوان الرئيسي -->
+    <h1 class="text-3xl font-bold mb-8 text-gray-800 border-b pb-3">
+        📚 الدروس الخاصة بالدورة:
+        <span class="text-green-700">{{ course.title_ar or course.title_en }}</span>
+    </h1>
+
+    <!-- أزرار التحكم -->
+    <div class="flex flex-wrap items-center gap-3 mb-8">
+        <a href="{{ url_for('admin_lesson_new', course_id=course.id) }}" 
+           class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow-md transition">
+           ➕ إضافة درس جديد
+        </a>
+        <a href="{{ url_for('admin_index') }}" 
+           class="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded-lg shadow-md transition">
+           ← رجوع للدورات
+        </a>
+    </div>
+
+    <!-- قائمة الدروس -->
+    {% if lessons %}
+    <div class="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
+        <table class="w-full text-right border-collapse">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="py-3 px-4 border-b">#</th>
+                    <th class="py-3 px-4 border-b">العنوان (AR)</th>
+                    <th class="py-3 px-4 border-b">العنوان (EN)</th>
+                    <th class="py-3 px-4 border-b">الترتيب</th>
+                    <th class="py-3 px-4 border-b">الفيديو</th>
+                    <th class="py-3 px-4 border-b text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for lesson in lessons %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="py-3 px-4 text-gray-700">{{ loop.index }}</td>
+                    <td class="py-3 px-4 font-semibold text-gray-800">{{ lesson.title_ar }}</td>
+                    <td class="py-3 px-4 text-gray-600">{{ lesson.title_en }}</td>
+                    <td class="py-3 px-4 text-gray-700">{{ lesson.position }}</td>
+                    <td class="py-3 px-4">
+                        {% if lesson.video %}
+                        <a href="{{ url_for('uploaded_file', filename=lesson.video) }}" 
+                           target="_blank" 
+                           class="text-blue-600 hover:underline hover:text-blue-800">
+                           🎥 عرض الفيديو
+                        </a>
+                        {% else %}
+                        <span class="text-gray-400">لا يوجد</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <!-- زر تعديل -->
+                            <a href="{{ url_for('admin_lesson_edit', course_id=course.id, lesson_id=lesson.id) }}" 
+                               class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-md text-sm shadow transition">
+                               ✏️ تعديل
+                            </a>
+
+                            <!-- زر حذف -->
+                        <!-- زر حذف -->
+<form method="post"
+      action="{{ url_for('admin_lesson_delete', course_id=course.id, lesson_id=lesson.id) }}"
+      onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟')">
+    <button type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm shadow transition">
+        🗑️ حذف
+    </button>
+</form>
+
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-600 text-lg mt-4">لم يتم إضافة أي دروس بعد.</p>
+    {% endif %}
+
+</main>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-4xl mx-auto px-6 py-10 bg-white rounded-2xl shadow-lg">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">{{ lesson.title_ar }}</h1>
+
+  {% if lesson.video %}
+  <video controls class="rounded-xl w-full h-96 shadow mb-6">
+    <source src="{{ url_for('uploaded_file', filename=lesson.video) }}" type="video/mp4">
+    متصفحك لا يدعم تشغيل الفيديو
+  </video>
+  {% endif %}
+
+  <div class="prose max-w-none text-gray-700 leading-relaxed">
+    {{ lesson.content_ar | safe }}
+  </div>
+
+  <div class="mt-8 text-center">
+    <a href="{{ url_for('course_page', course_id=lesson.course_id) }}" class="text-blue-600 hover:underline">← العودة إلى قائمة الدروس</a>
+  </div>
+</main>
+{% endblock %}

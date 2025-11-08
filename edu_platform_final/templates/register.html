@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="flex items-center justify-center min-h-[85vh] bg-gradient-to-br from-gray-50 to-green-50 py-10">
+  <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+    
+    <!-- عنوان الصفحة -->
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">
+      {{ 'إنشاء حساب جديد' if lang=='ar' else 'Create a New Account' }}
+    </h2>
+
+    <!-- نموذج التسجيل -->
+    <form method="post" class="space-y-4">
+
+      <div>
+        <label class="block text-gray-700 mb-1 text-sm font-semibold">{{ 'الاسم الكامل' if lang=='ar' else 'Full Name' }}</label>
+        <input name="fullname" required
+               placeholder="{{ 'أدخل اسمك الكامل' if lang=='ar' else 'Enter your full name' }}"
+               class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"/>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1 text-sm font-semibold">{{ 'البريد الإلكتروني' if lang=='ar' else 'Email' }}</label>
+        <input name="email" type="email" required
+               placeholder="{{ 'example@email.com' if lang=='ar' else 'example@email.com' }}"
+               class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"/>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1 text-sm font-semibold">{{ 'كلمة المرور' if lang=='ar' else 'Password' }}</label>
+        <input name="password" type="password" required
+               placeholder="{{ 'أدخل كلمة المرور' if lang=='ar' else 'Enter your password' }}"
+               class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"/>
+      </div>
+
+      <div>
+        <label class="block text-gray-700 mb-1 text-sm font-semibold">{{ 'تأكيد كلمة المرور' if lang=='ar' else 'Confirm Password' }}</label>
+        <input name="confirm" type="password" required
+               placeholder="{{ 'أعد إدخال كلمة المرور' if lang=='ar' else 'Re-enter your password' }}"
+               class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"/>
+      </div>
+
+      <!-- زر التسجيل -->
+      <button type="submit"
+              class="w-full py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition">
+        {{ 'تسجيل' if lang=='ar' else 'Register' }}
+      </button>
+    </form>
+
+    <!-- رابط تسجيل الدخول -->
+    <p class="text-center text-gray-600 text-sm mt-5">
+      {{ 'لديك حساب بالفعل؟' if lang=='ar' else 'Already have an account?' }}
+      <a href="{{ url_for('login', lang=lang) }}" class="text-green-600 font-semibold hover:underline">
+        {{ 'تسجيل الدخول' if lang=='ar' else 'Login' }}
+      </a>
+    </p>
+  </div>
+</section>
+
+{% endblock %}

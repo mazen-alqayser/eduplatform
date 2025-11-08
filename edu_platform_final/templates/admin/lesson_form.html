@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<main class="max-w-3xl mx-auto px-6 py-10">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">
+        {% if lesson %}تعديل الدرس{% else %}إضافة درس جديد{% endif %}
+    </h1>
+
+    <!-- ✅ نموذج التعديل أو الإضافة -->
+    <form method="post" enctype="multipart/form-data"
+          action="{% if lesson %}{{ url_for('admin_lesson_edit', course_id=course_id, lesson_id=lesson.id) }}{% else %}{{ url_for('admin_lesson_new', course_id=course_id) }}{% endif %}"
+          class="bg-white shadow-lg rounded-2xl p-6 border border-gray-200 space-y-4">
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">العنوان بالعربية</label>
+            <input name="title_ar" required
+                   value="{{ lesson.title_ar if lesson else '' }}"
+                   class="w-full p-2 border rounded-md focus:ring focus:ring-blue-200"/>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">العنوان بالإنجليزية</label>
+            <input name="title_en"
+                   value="{{ lesson.title_en if lesson else '' }}"
+                   class="w-full p-2 border rounded-md focus:ring focus:ring-blue-200"/>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">الترتيب</label>
+            <input type="number" name="position"
+                   value="{{ lesson.position if lesson else 0 }}"
+                   class="w-full p-2 border rounded-md focus:ring focus:ring-blue-200"/>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">تحميل فيديو الدرس</label>
+            {% if lesson and lesson.video %}
+                <p class="mb-2">
+                    🎬 الفيديو الحالي:
+                    <a href="{{ url_for('uploaded_file', filename=lesson.video) }}" target="_blank" class="text-blue-600 underline">عرض الفيديو</a>
+                </p>
+            {% endif %}
+            <input type="file" name="video" class="w-full border p-2 rounded-md"/>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">المحتوى (بالعربية)</label>
+            <textarea name="content_ar" rows="5"
+                      class="w-full p-2 border rounded-md focus:ring focus:ring-blue-200">{{ lesson.content_ar if lesson else '' }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 mb-1 font-medium">المحتوى (بالإنجليزية)</label>
+            <textarea name="content_en" rows="5"
+                      class="w-full p-2 border rounded-md focus:ring focus:ring-blue-200">{{ lesson.content_en if lesson else '' }}</textarea>
+        </div>
+
+        <div class="flex justify-between items-center pt-4">
+            <button class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition">
+                💾 {% if lesson %}تحديث الدرس{% else %}حفظ الدرس{% endif %}
+            </button>
+            <a href="{{ url_for('admin_lessons', course_id=course_id) }}"
+               class="text-gray-600 hover:text-gray-800 underline">إلغاء والعودة</a>
+        </div>
+    </form>
+
+    <!-- ✅ نموذج الحذف منفصل عن نموذج التعديل -->
+    {% if lesson %}
+    <form method="post"
+          action="{{ url_for('admin_lesson_delete', course_id=course_id, lesson_id=lesson.id) }}"
+          onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');"
+          class="mt-4">
+        <button type="submit"
+                class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition">
+            🗑️ حذف الدرس
+        </button>
+    </form>
+    {% endif %}
+</main>
+{% endblock %}
