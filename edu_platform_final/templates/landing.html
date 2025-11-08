@@ -8,6 +8,10 @@
             // يجب أن يعيد قائمة فارغة أو القيمة إذا لم يتم العثور على العنصر أو إذا كان النص فارغًا لتجنب الأخطاء
             if (!el || !el.textContent.trim()) return id === 'slide-data' ? [] : null;
             try {
+                // إزالة علامات الاقتباس الإضافية من متغير 'lang'
+                if (id === 'lang-data') {
+                    return el.textContent.replace(/"/g, '').trim();
+                }
                 return JSON.parse(el.textContent);
             } catch (e) {
                 console.error("Failed to parse JSON for element:", id, e);
@@ -17,13 +21,12 @@
     </script>
     
     {# تخزين بيانات الشرائح الحقيقية (hero_slides) في وسم سكريبت مخفي لاستخدامه في JavaScript #}
-    {# 💡 تم استبدال slide_content الثابتة بـ hero_slides الديناميكية الممررة من الـ Route 💡 #}
     <script id="slide-data" type="application/json">{{ hero_slides | tojson | safe }}</script>
     <script id="lang-data" type="application/json">"{{ lang }}"</script>
 
 
-    {# 🌟 بداية قسم السلايدر (Hero Section) المُحدَّث 🌟 #}
-    <section class="relative bg-gray-900 min-h-[70vh] flex items-center pt-20 pb-16 overflow-hidden">
+    {# 🌟 بداية قسم السلايدر (Hero Section) المُحدَّث بأبعاد محسّنة 🌟 #}
+    <section class="relative bg-gray-900 min-h-[85vh] md:min-h-[75vh] flex items-center pt-20 pb-16 overflow-hidden">
         
        <div id="course-slider-container" class="absolute inset-0 z-0">
             {% for slide in hero_slides %}
@@ -34,25 +37,25 @@
                 <img src="{{ url_for('uploaded_file', filename=image_path) }}" 
                     alt="{{ slide.title_en if lang=='en' else slide.title_ar }}" class="w-full h-full object-cover">
                 
-                <div class="absolute inset-0 bg-gray-900/60 backdrop-brightness-75"></div>
+                <div class="absolute inset-0 bg-gray-900/65 backdrop-brightness-75"></div>
             </div>
             {% endfor %}
         </div>
 
         <div class="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-12 text-white">
             
-            <div class="lg:col-span-7 space-y-6 text-center {{ 'lg:text-right' if lang=='ar' else 'lg:text-left' }}">
+            <div class="lg:col-span-7 space-y-6 text-center {{ 'lg:text-right' if lang=='ar' else 'lg:text-left' }} reveal-up d-100">
                 <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight drop-shadow-lg" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.4);">
                     {{ 'Unlock Your Professional Future with Elite Courses' if lang=='en' else 'مستقبلك المهني يبدأ هنا: دورات النخبة والاعتماد العالمي' }}
                 </h1>
 
-                <p class="text-lg md:text-xl text-white/90 max-w-2xl {{ 'mx-auto lg:mr-0' if lang=='ar' else 'mx-auto lg:ml-0' }} leading-relaxed drop-shadow">
+                <p class="text-lg md:text-xl text-white/90 max-w-2xl {{ 'mx-auto lg:mr-0' if lang=='ar' else 'mx-auto lg:ml-0' }} leading-relaxed drop-shadow reveal-up d-200">
                     {# 💡 استخدام العنصر الثاني من قائمة النصوص الترويجية الممررة 💡 #}
                     {{ promos[1] }}
                 </p>
 
-                <div class="flex flex-wrap {{ 'justify-center lg:justify-end' if lang=='ar' else 'justify-center lg:justify-start' }} gap-4 pt-6">
-                    <a href="#categories" class="px-7 py-3 bg-amber-400 text-gray-900 font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-3 group">
+                <div class="flex flex-wrap {{ 'justify-center lg:justify-end' if lang=='ar' else 'justify-center lg:justify-start' }} gap-4 pt-6 reveal-up d-300">
+                    <a href="#categories" class="px-7 py-3 bg-amber-400 text-gray-900 font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-3 group animate-pulse-light">
                         <svg class="w-5 h-5 transform {{ 'group-hover:translate-x-1' if lang!='en' else 'group-hover:translate-x-[-4px]' }} transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
@@ -69,8 +72,8 @@
             </div>
 
             {# حاوية لعرض عبارة السلايدر الحالية أسفل اليمين/اليسار #}
-            <div class="lg:col-span-5 hidden lg:block relative">
-                <div id="slider-caption" class="absolute {{ 'right-0' if lang=='ar' else 'left-0' }} bottom-0 p-6 max-w-sm rounded-xl bg-white/10 backdrop-blur-md shadow-2xl transition-all duration-500 ease-out border border-white/20 transform translate-y-20 opacity-0">
+            <div class="lg:col-span-5 hidden lg:block relative reveal-up d-400">
+                <div id="slider-caption" class="absolute {{ 'right-0' if lang=='ar' else 'left-0' }} bottom-0 p-6 max-w-sm rounded-xl bg-white/15 backdrop-blur-md shadow-2xl transition-all duration-500 ease-out border border-white/20 transform translate-y-20 opacity-0">
                     <p class="text-sm font-bold text-amber-400 mb-1" id="caption-category">{{ 'Featured Program' if lang=='en' else 'برنامج مميز' }}</p>
                     <h3 class="text-xl font-extrabold mb-1" id="caption-title"></h3>
                     <p class="text-sm text-white/80" id="caption-desc"></p>
@@ -80,10 +83,10 @@
         </div>
 
         {# 💡 نقاط التنقل الديناميكية 💡 #}
-        <div id="slider-dots" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-3">
+        <div id="slider-dots" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 flex gap-3 reveal-up d-500">
             {# 💡 تم التعديل لاستخدام طول القائمة الحقيقية hero_slides 💡 #}
             {% for i in range(hero_slides|length) %}
-                <span data-dot-index="{{ loop.index - 1 }}" class="w-2 h-2 rounded-full bg-white/50 cursor-pointer transition-all duration-300 hover:bg-white dot-item"></span>
+            <span data-dot-index="{{ loop.index - 1 }}" class="w-2 h-2 rounded-full bg-white/50 cursor-pointer transition-all duration-300 hover:bg-white dot-item"></span>
             {% endfor %}
         </div>
     </section>
@@ -91,8 +94,8 @@
     {# 🔚 نهاية قسم السلايدر (Hero Section) المُحدَّث 🔚 #}
 
     <section id="categories" class="max-w-7xl mx-auto px-6 py-20">
-        <div class="text-center mb-12">
-            <span class="text-sm font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-4 py-1 rounded-full shadow-sm d-100 reveal-up">{{ 'Your Path to Mastery' if lang=='en' else 'طريقك نحو الإتقان' }}</span>
+        <div class="text-center mb-16">
+            <span class="text-sm font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-4 py-1 rounded-full shadow-sm reveal-up d-100">{{ 'Your Path to Mastery' if lang=='en' else 'طريقك نحو الإتقان' }}</span>
             <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-4 reveal-up d-200">{{ 'Choose Your Learning Domain' if lang=='en' else 'اختر مجال التعلم الذي يناسب طموحك' }}</h2>
         </div>
 
@@ -106,48 +109,51 @@
             ] %}
 
             {% for cat in categories %}
-            <a href="/explore/?category={{ cat.slug }}" class="group block p-6 rounded-2xl shadow-lg border border-gray-100 transform hover:-translate-y-2 transition duration-300 bg-white relative overflow-hidden reveal-up d-{{ loop.index * 100 }}" aria-label="{{ cat.title_en if lang=='en' else cat.title_ar }}">
-                <div class="absolute -left-8 -top-8 w-40 h-40 rounded-full bg-gradient-to-br {{ cat.color }} opacity-10 group-hover:opacity-20 transition"></div>
-                <div class="flex flex-col items-center justify-center gap-4">
-                    <div class="rounded-lg p-3 bg-gradient-to-br {{ cat.color }} text-white shadow-md transform group-hover:scale-110 transition duration-300" aria-hidden>
+            <button type="button" data-title-ar="{{ cat.title_ar }}" data-title-en="{{ cat.title_en }}" 
+                    class="group block p-6 rounded-2xl shadow-xl border border-gray-100 transform hover:-translate-y-2 transition duration-500 hover:shadow-2xl bg-white relative overflow-hidden reveal-up d-{{ loop.index * 100 }} show-motivation" 
+                    aria-label="{{ cat.title_en if lang=='en' else cat.title_ar }}">
+                <div class="absolute -left-8 -top-8 w-40 h-40 rounded-full bg-gradient-to-br {{ cat.color }} opacity-10 group-hover:opacity-20 transition duration-500"></div>
+                <div class="flex flex-col items-center justify-center gap-4 pointer-events-none"> {# Pointer-events-none لمنع تعارض النقر #}
+                    <div class="rounded-lg p-3 bg-gradient-to-br {{ cat.color }} text-white shadow-md transform group-hover:scale-110 transition duration-500 group-hover:rotate-3" aria-hidden>
                         {{ cat.icon | safe }}
                     </div>
                     <p class="mt-2 text-base font-bold text-gray-900">{{ cat.title_en if lang=='en' else cat.title_ar }}</p>
                 </div>
-            </a>
+            </button>
             {% endfor %}
         </div>
     </section>
 
     <section id="courses" class="max-w-7xl mx-auto px-6 py-20">
-        <div class="text-center mb-12">
+        <div class="text-center mb-16">
             <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 reveal-up d-200">{{ 'Featured Programs That Define Careers' if lang=='en' else 'برامجنا المختارة التي تحدد المسارات المهنية' }}</h2>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {# 💡 عرض الدورات الحقيقية الممررة 💡 #}
             {% for c in courses %}
-            <article class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transform hover:-translate-y-3 transition duration-300 group reveal-up d-{{ loop.index * 100 }}" aria-labelledby="course-{{ c.id }}">
-                <div class="relative h-44 bg-gradient-to-br from-indigo-600 to-emerald-500">
+            <article class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transform hover:-translate-y-3 transition duration-500 group reveal-up d-{{ loop.index * 150 }}" aria-labelledby="course-{{ c.id }}">
+                <div class="relative h-44 bg-gradient-to-br from-indigo-600 to-emerald-500 overflow-hidden">
                     {# استخدام شرط لفحص وجود الصورة وعرض صورة placeholder في حال عدم وجودها #}
                     {% set course_image = c.image and url_for('uploaded_file', filename=c.image) or 'https://placehold.co/1200x800/6366f1/ffffff?text=Course+Image' %}
-                    <img src="{{ course_image }}" alt="{{ c.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <img src="{{ course_image }}" alt="{{ c.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition duration-500"></div>
                 </div>
 
                 <div class="p-5">
-                    <span class="inline-block px-3 py-1 text-xs font-bold bg-green-100 text-green-800 rounded-full">{{ 'Expert Level' if lang=='en' else 'مستوى خبير' }}</span>
-                    <h3 id="course-{{ c.id }}" class="mt-3 font-extrabold text-lg text-gray-900 line-clamp-2">{{ c.title }}</h3>
+                    <span class="inline-block px-3 py-1 text-xs font-bold bg-green-100 text-green-800 rounded-full animate-fade-in d-200">{{ 'Expert Level' if lang=='en' else 'مستوى خبير' }}</span>
+                    <h3 id="course-{{ c.id }}" class="mt-3 font-extrabold text-xl text-gray-900 line-clamp-2">{{ c.title }}</h3>
                     <p class="mt-2 text-sm text-gray-600 line-clamp-3">{{ c.short_desc }}</p>
 
-                    <div class="mt-4 flex items-center justify-between">
-                        <a href="{{ url_for('course_page', course_id=c.id, lang=lang) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">
+                    <div class="mt-5 flex items-center justify-between">
+                        <a href="{{ url_for('course_page', course_id=c.id, lang=lang) }}" class="inline-flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition transform hover:shadow-lg hover:scale-[1.02]">
                             {{ 'View Course' if lang=='en' else 'عرض الدورة' }}
                         </a>
                         <div class="flex items-center gap-2 text-yellow-500 font-bold">
-                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden>
+                            <svg class="w-5 h-5 fill-current transform group-hover:rotate-12 transition duration-500" viewBox="0 0 24 24" aria-hidden>
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
                             </svg>
-                            <span class="text-sm">4.9</span>
+                            <span class="text-base">4.9</span>
                         </div>
                     </div>
                 </div>
@@ -155,12 +161,21 @@
             {% endfor %}
         </div>
 
-        <div class="text-center mt-12">
-            <a href="{{ url_for('register', lang=lang) }}" class="px-10 py-3 bg-transparent border-2 border-indigo-600 text-indigo-700 font-bold rounded-full hover:bg-indigo-50 transition">{{ 'Discover All Programs' if lang=='en' else 'اكتشف جميع البرامج' }} <span class="{{ 'ml-2' if lang=='en' else 'mr-2' }}">&rarr;</span></a>
+        <div class="text-center mt-16 reveal-up d-600">
+            <a href="{{ url_for('register', lang=lang) }}" class="px-10 py-3 bg-transparent border-2 border-indigo-600 text-indigo-700 font-bold rounded-full hover:bg-indigo-50 hover:text-white transition transform hover:scale-105 shadow-md">{{ 'Discover All Programs' if lang=='en' else 'اكتشف جميع البرامج' }} <span class="{{ 'ml-2' if lang=='en' else 'mr-2' }}">&rarr;</span></a>
         </div>
     </section>
 
 </main>
+
+{# 🌟 حاوية رسالة التحفيز (Toast) 🌟 #}
+<div id="motivation-toast" class="fixed {{ 'left-4' if lang=='en' else 'right-4' }} bottom-4 z-50 transition-all duration-500 ease-out transform translate-y-full opacity-0">
+    <div class="bg-indigo-600 text-white p-4 rounded-lg shadow-xl max-w-xs md:max-w-sm flex items-center gap-3 border-b-4 border-amber-400">
+        <svg class="w-6 h-6 text-amber-300 animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 4.04M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span id="toast-message" class="font-semibold text-sm"></span>
+    </div>
+</div>
+{# 🔚 نهاية حاوية رسالة التحفيز 🔚 #}
 
 <script>
     // --------------------------------------------------
@@ -168,7 +183,7 @@
     // --------------------------------------------------
 
     const slideData = getJinjaVariable('slide-data');
-    const lang = getJinjaVariable('lang-data');
+    const currentLang = getJinjaVariable('lang-data'); // تم تغيير الاسم لتجنب التعارض
     
     // 💡 التحقق من وجود بيانات الشرائح 💡
     if (slideData && slideData.length > 0) {
@@ -179,7 +194,7 @@
         const captionDesc = document.getElementById('caption-desc');
         const slideCount = slides.length;
         let currentSlide = 0;
-        const intervalTime = 4000; 
+        const intervalTime = 5000; // تم زيادة وقت التوقف قليلاً 
         let sliderInterval;
         
         function updateDots(index) {
@@ -215,8 +230,8 @@
             // تحديث محتوى العبارة بعد فترة قصيرة
             setTimeout(() => {
                 // 💡 استخدام الأعمدة الحقيقية من قاعدة البيانات 💡
-                captionTitle.textContent = lang === 'en' ? data.title_en : data.title_ar;
-                captionDesc.textContent = lang === 'en' ? data.desc_en : data.desc_ar;
+                captionTitle.textContent = currentLang === 'en' ? data.title_en : data.title_ar;
+                captionDesc.textContent = currentLang === 'en' ? data.desc_en : data.desc_ar;
                 
                 // إظهار العبارة الجديدة
                 captionContainer.classList.remove('translate-y-20', 'opacity-0');
@@ -261,7 +276,57 @@
 
 
     // --------------------------------------------------
-    // 2. REVEAL ANIMATION SCRIPT (No changes, looks fine)
+    // 2. MOTIVATION TOAST SCRIPT
+    // --------------------------------------------------
+    function setupMotivationToasts() {
+        const motivationButtons = document.querySelectorAll('.show-motivation');
+        const toastContainer = document.getElementById('motivation-toast');
+        const toastMessage = document.getElementById('toast-message');
+
+        // رسائل تحفيزية باللغتين
+        const messages = {
+            ar: [
+                "أنت مميز، ومستقبلك باهر! ✨",
+                "هذا المجال في انتظار إبداعك. 🚀",
+                "النجاح يبدأ بخطوة، وأنت مستعد لها. 💪",
+                "استمر في التعلم، القمة لك! 💡",
+                "فرصتك قادمة، كن مستعداً. 🌟",
+            ],
+            en: [
+                "You are remarkable, your future is bright! ✨",
+                "This field awaits your creativity. 🚀",
+                "Success starts with a step, and you're ready. 💪",
+                "Keep learning, the top is yours! 💡",
+                "Your opportunity is coming, be ready. 🌟",
+            ]
+        };
+
+        function showToast() {
+            const langKey = currentLang === 'ar' ? 'ar' : 'en';
+            const selectedMessages = messages[langKey];
+            const randomMessage = selectedMessages[Math.floor(Math.random() * selectedMessages.length)];
+            
+            toastMessage.textContent = randomMessage;
+
+            // إظهار التوست (تحريكه للأعلى وتغيير الشفافية)
+            toastContainer.classList.remove('translate-y-full', 'opacity-0');
+            toastContainer.classList.add('translate-y-0', 'opacity-100');
+
+            // إخفاء التوست بعد 3 ثوانٍ
+            setTimeout(() => {
+                toastContainer.classList.remove('translate-y-0', 'opacity-100');
+                toastContainer.classList.add('translate-y-full', 'opacity-0');
+            }, 3000);
+        }
+
+        motivationButtons.forEach(button => {
+            button.addEventListener('click', showToast);
+        });
+    }
+
+
+    // --------------------------------------------------
+    // 3. REVEAL ANIMATION SCRIPT (Enhanced)
     // --------------------------------------------------
     function setupRevealAnimations() {
         const revealElements = document.querySelectorAll('.reveal-up');
@@ -285,25 +350,51 @@
                 }
             });
         }, {
-            threshold: 0.1
+            threshold: 0.1, // يبدأ الانيميشن عندما يصبح 10% من العنصر مرئياً
+            rootMargin: '0px 0px -50px 0px' // يبدأ قبل وصوله إلى قاع الشاشة بـ 50 بكسل
         });
 
         revealElements.forEach(el => {
             el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease-in-out';
+            el.style.transform = 'translateY(25px)'; // زيادة الحركة لـ 25 بكسل
+            el.style.transition = 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.7s ease-in-out'; // زيادة مدة الانيميشن
             
             observer.observe(el);
         });
     }
     
-    window.onload = setupRevealAnimations;
-
+    // تشغيل جميع الوظائف عند تحميل الصفحة
+    window.onload = function() {
+        setupRevealAnimations();
+        setupMotivationToasts();
+    };
 </script>
 <style>
     /* -------------------------------------------------- */
     /* Custom Styles (Tailwind utility is primary) */
     /* -------------------------------------------------- */
+    @keyframes pulse-light {
+        0%, 100% {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        50% {
+            box-shadow: 0 20px 25px -5px rgba(251, 191, 36, 0.5), 0 8px 10px -6px rgba(251, 191, 36, 0.3);
+        }
+    }
+
+    .animate-pulse-light {
+        animation: pulse-light 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .animate-spin-slow {
+        animation: spin-slow 10s linear infinite; /* حركة دوران بطيئة ومستمرة */
+    }
+    
     .font-sans {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     }
